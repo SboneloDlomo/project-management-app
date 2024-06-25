@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Project Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card {
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .card-body {
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Project Management</h2>
+        <form id="projectForm" method="POST">
+            <div class="form-group">
+                <label for="projectName">Project Name</label>
+                <input type="text" class="form-control" id="projectName" name="projectName" placeholder="Enter project name" required>
+            </div>
+            <div class="form-group">
+                <label for="projectDescription">Project Description</label>
+                <textarea class="form-control" id="projectDescription" name="projectDescription" rows="3" placeholder="Enter project description" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Project</button>
+        </form>
+
+        <div id="projectCards" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('projectForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            var projectName = document.getElementById('projectName').value;
+            var projectDescription = document.getElementById('projectDescription').value;
+
+            var project = {
+                name: projectName,
+                description: projectDescription
+            };
+
+            fetch('/api/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(project)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Project submitted successfully!');
+                // Clear form fields after successful submission
+                document.getElementById('projectName').value = '';
+                document.getElementById('projectDescription').value = '';
+                loadProjects();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit project. Please try again later.');
+            });
+        });
+
+        function loadProjects() {
+            fetch('/api/projects')
+            .then(response => response.json())
+            .then(data => {
+                var projectCards = document.getElementById('projectCards');
+                projectCards.innerHTML = '';
+                data.forEach(project => {
+                    var card = `
+                        <div class="card">
+                            <div class="card-header">
+                                ${project.name}
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">${project.description}</p>
+                            </div>
+                        </div>
+                    `;
+                    projectCards.innerHTML += card;
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Load projects on page load
+        loadProjects();
+    </script>
+</body>
+</html>
